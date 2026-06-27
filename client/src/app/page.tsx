@@ -55,22 +55,89 @@ export default function Home() {
       return;
     }
 
+    // Trava de segurança Lógica
+    const targetPost = posts.find((p) => p.id === postId) as any;
+    if (targetPost?.disliked) {
+      return; // Impede a continuação caso já tenha dislike
+    }
+
     setPosts((prevPosts) =>
-      prevPosts.map((post) =>
-        post.id === postId ? { ...post, liked: !post.liked } : post
-      )
+      prevPosts.map((post) => {
+        if (post.id === postId) {
+          const isNowLiked = !post.liked;
+          const currentLikes = post.reactions?.likes || 0;
+          const currentDislikes = post.reactions?.dislikes || 0;
+
+          return {
+            ...post,
+            liked: isNowLiked,
+            reactions: {
+              likes: isNowLiked ? currentLikes + 1 : currentLikes - 1,
+              dislikes: currentDislikes,
+            },
+          };
+        }
+        return post;
+      })
     );
 
     try {
       await postsService.toggleLikePost({ postId, userId: user.id });
     } catch {
       setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === postId ? { ...post, liked: !post.liked } : post
-        )
+        prevPosts.map((post) => {
+          if (post.id === postId) {
+            const wasLiked = !post.liked;
+            const currentLikes = post.reactions?.likes || 0;
+            const currentDislikes = post.reactions?.dislikes || 0;
+
+            return {
+              ...post,
+              liked: wasLiked,
+              reactions: {
+                likes: wasLiked ? currentLikes + 1 : currentLikes - 1,
+                dislikes: currentDislikes,
+              },
+            };
+          }
+          return post;
+        })
       );
       alert("Erro ao curtir post. Tente novamente.");
     }
+  }
+
+  function handleDislike(postId: number) {
+    if (!user) {
+      alert("Você precisa estar autenticado para descurtir posts!");
+      return;
+    }
+
+    // Trava de segurança Lógica
+    const targetPost = posts.find((p) => p.id === postId) as any;
+    if (targetPost?.liked) {
+      return; // Impede a continuação caso já tenha like
+    }
+
+    setPosts((prevPosts) =>
+      prevPosts.map((post: any) => {
+        if (post.id === postId) {
+          const isNowDisliked = !post.disliked;
+          const currentLikes = post.reactions?.likes || 0;
+          const currentDislikes = post.reactions?.dislikes || 0;
+
+          return {
+            ...post,
+            disliked: isNowDisliked,
+            reactions: {
+              likes: currentLikes,
+              dislikes: isNowDisliked ? currentDislikes + 1 : currentDislikes - 1,
+            },
+          };
+        }
+        return post;
+      })
+    );
   }
 
   function handleLoadMore() {
@@ -126,12 +193,13 @@ export default function Home() {
         ) : (
           <>
             <div>
-              {posts.map((post) => (
+              {posts.map((post: any) => (
                 <PostCard
                   key={post.id}
                   post={post}
                   isAuthenticated={isAuthenticated}
                   onLike={handleLike}
+                  onDislike={handleDislike}
                 />
               ))}
             </div>

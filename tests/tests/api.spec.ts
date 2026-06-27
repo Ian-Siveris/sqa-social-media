@@ -3,11 +3,9 @@ import { test, expect } from '@playwright/test';
 const API_URL = 'http://localhost:8080'; 
 let randomEmail = '';
 
-// O ".serial" garante que ele execute passo a passo na ordem certa!
 test.describe.serial('Testes de API - Autenticação', () => {
 
   test.beforeAll(() => {
-    // Gera um e-mail novo toda vez que o teste começa
     randomEmail = `usuario_${Date.now()}@fag.edu.br`;
   });
 

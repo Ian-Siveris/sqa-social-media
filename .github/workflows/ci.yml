@@ -58,17 +58,12 @@ jobs:
 
       - name: Iniciar Servidores e Rodar E2E
         env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/social_media?useSSL=false&serverTimezone=UTC
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/social_media?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: server
         run: |
           cd api
-          ./mvnw spring-boot:run > boot.log 2>&1 &
-          
-          sleep 15
-          echo "==== LOG DO SPRING BOOT ===="
-          cat boot.log
-          echo "============================"
+          ./mvnw spring-boot:run &
           
           cd ../client
           npm run dev &

@@ -56,17 +56,15 @@ jobs:
           npm install
           npx playwright install --with-deps chromium firefox webkit
 
-     - name: Iniciar Servidores e Rodar E2E
+      - name: Iniciar Servidores e Rodar E2E
         env:
           SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/social_media?useSSL=false&serverTimezone=UTC
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: server
         run: |
           cd api
-          # Liga o Java e salva o log
           ./mvnw spring-boot:run > boot.log 2>&1 &
           
-          # Espera 15 segundos para dar tempo de quebrar e cospe o log na tela
           sleep 15
           echo "==== LOG DO SPRING BOOT ===="
           cat boot.log

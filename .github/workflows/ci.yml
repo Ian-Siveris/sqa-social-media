@@ -57,6 +57,11 @@ jobs:
           npx playwright install --with-deps chromium firefox webkit
 
       - name: Iniciar Servidores e Rodar E2E
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/sqa_social_media?useSSL=false&serverTimezone=UTC
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: root
+          SPRING_JPA_HIBERNATE_DDL_AUTO: update
         run: |
           cd api
           ./mvnw spring-boot:run &
@@ -65,6 +70,7 @@ jobs:
           npm run dev &
           
           cd ../tests
-          npx wait-on tcp:8080 tcp:3000 -t 120000
+          # Usando 127.0.0.1 para evitar conflitos de IPv6 na nuvem
+          npx wait-on tcp:127.0.0.1:8080 tcp:127.0.0.1:3000 -t 120000
           
           npx playwright test

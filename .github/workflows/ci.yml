@@ -9,8 +9,22 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: server
+          MYSQL_DATABASE: social_media
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -uroot -pserver"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
     steps:
-      - name: Clonar o repositório
+      - name: Clonar o repositorio
         uses: actions/checkout@v4
 
       - name: Configurar Java 17
@@ -36,7 +50,7 @@ jobs:
           npm install
           npm run test
 
-      - name: Instalar dependências E2E (Playwright)
+      - name: Instalar dependencias E2E (Playwright)
         working-directory: ./tests
         run: |
           npm install
@@ -44,12 +58,9 @@ jobs:
 
       - name: Iniciar Servidores e Rodar E2E
         env:
-          SPRING_DATASOURCE_URL: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
-          SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver
-          SPRING_DATASOURCE_USERNAME: sa
-          SPRING_DATASOURCE_PASSWORD: sa
-          SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.H2Dialect
-          SPRING_JPA_HIBERNATE_DDL_AUTO: update
+          SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/social_media?useSSL=false&serverTimezone=UTC
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: server
         run: |
           cd api
           ./mvnw spring-boot:run &
